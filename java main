@@ -1,0 +1,159 @@
+const startBtn = document.getElementById('start-btn');
+const fightBtn = document.getElementById('fight-btn');
+const restartBtn = document.getElementById('restart-btn');
+const themeToggle = document.getElementById('theme-toggle');
+const startScreen = document.getElementById('start-screen');
+const weaponScreen = document.getElementById('weapon-screen');
+const fightScreen = document.getElementById('fight-screen');
+const resultScreen = document.getElementById('result-screen');
+const winnerText = document.getElementById('winner-text');
+const canvas = document.getElementById('fight-canvas');
+const ctx = canvas.getContext('2d');
+const playerLifeBar = document.getElementById('player-life');
+const cpuLifeBar = document.getElementById('cpu-life');
+
+let theme = 'light';
+let playerWeapon = null;
+let cpuWeapon = null;
+
+// Cambiar tema
+themeToggle.addEventListener('click', () => {
+    theme = theme === 'light' ? 'dark' : 'light';
+    document.body.className = theme;
+});
+
+// Pantallas
+startBtn.addEventListener('click', () => {
+    startScreen.classList.add('hidden');
+    weaponScreen.classList.remove('hidden');
+});
+
+document.querySelectorAll('.weapon-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        playerWeapon = btn.dataset.weapon;
+        document.querySelectorAll('.weapon-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+    });
+});
+
+fightBtn.addEventListener('click', () => {
+    if(!playerWeapon) return;
+    weaponScreen.classList.add('hidden');
+    fightScreen.classList.remove('hidden');
+    cpuWeapon = ['sword','knife','hammer'][Math.floor(Math.random()*3)];
+    startFight();
+});
+
+restartBtn.addEventListener('click', () => location.reload());
+
+// Stickman básico y físicas
+class Stickman {
+    constructor(x, y, color, weapon) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.weapon = weapon;
+        this.width = 20;
+        this.height = 60;
+        this.vel = {x:0,y:0};
+        this.life = 120;
+    }
+    draw() {
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = 3;
+        // Cabeza
+        ctx.beginPath();
+        ctx.arc(this.x, this.y-50, 10, 0, Math.PI*2);
+        ctx.stroke();
+        // Cuerpo
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y-40);
+        ctx.lineTo(this.x, this.y);
+        ctx.stroke();
+        // Brazos
+        ctx.beginPath();
+        ctx.moveTo(this.x-15, this.y-30);
+        ctx.lineTo(this.x+15, this.y-30);
+        ctx.stroke();
+        // Piernas
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y);
+        ctx.lineTo(this.x-10, this.y+20);
+        ctx.moveTo(this.x, this.y);
+        ctx.lineTo(this.x+10, this.y+20);
+        ctx.stroke();
+        // Arma minimalista
+        ctx.beginPath();
+        if(this.weapon==='sword'){
+            ctx.moveTo(this.x, this.y-35);
+            ctx.lineTo(this.x+25, this.y-35);
+        } else if(this.weapon==='knife'){
+            ctx.moveTo(this.x, this.y-35);
+            ctx.lineTo(this.x+15, this.y-35);
+        } else if(this.weapon==='hammer'){
+            ctx.moveTo(this.x, this.y-35);
+            ctx.lineTo(this.x+30, this.y-30);
+        }
+        ctx.stroke();
+    }
+    move(dx, dy) {
+        this.x += dx;
+        this.y += dy;
+    }
+}
+
+let player = new Stickman(200, 300, 'white', null);
+let cpu = new Stickman(600, 300, 'black', null);
+
+// Movimiento jugador
+const keys = {};
+window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+
+// Físicas simples de combate
+function update() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    // Movimiento jugador
+    if(keys['w']) player.move(0,-2);
+    if(keys['s']) player.move(0,2);
+    if(keys['a']) player.move(-2,0);
+    if(keys['d']) player.move(2,0);
+
+    // Movimiento CPU aleatorio simple
+    let dx = (Math.random()-0.5)*2;
+    let dy = (Math.random()-0.5)*2;
+    cpu.move(dx, dy);
+
+    // Dibujo
+    player.draw();
+    cpu.draw();
+
+    // Actualizar vida barras
+    playerLifeBar.style.width = player.life+'px';
+    cpuLifeBar.style.width = cpu.life+'px';
+
+    // Comprobar colisiones simplificadas
+    if(Math.abs(player.x-cpu.x)<20 && Math.abs(player.y-cpu.y)<40){
+        cpu.life -= 0.5; // daño básico
+    }
+    if(cpu.life<=0){
+        endFight('Jugador');
+    }
+    if(player.life<=0){
+        endFight('CPU');
+    }
+
+    requestAnimationFrame(update);
+}
+
+function startFight() {
+    player.weapon = playerWeapon;
+    cpu.weapon = cpuWeapon;
+    update();
+}
+
+function endFight(winner) {
+    fightScreen.classList.add('hidden');
+    resultScreen.classList.remove('hidden');
+    winnerText.innerText = winner + ' gana';
+}
