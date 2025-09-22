@@ -1,2 +1,0 @@
-# stickamangpt
-Hello world!

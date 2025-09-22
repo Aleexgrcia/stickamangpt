@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stickman Fighter</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="light">
+    <!-- Barra de configuración -->
+    <div class="settings-bar">
+        <button id="theme-toggle">Modo Claro/Oscuro</button>
+    </div>
+
+    <!-- Pantalla inicial -->
+    <div id="start-screen" class="screen">
+        <h1>Stickman Fighter</h1>
+        <button id="start-btn">Start</button>
+    </div>
+
+    <!-- Pantalla de selección de armas -->
+    <div id="weapon-screen" class="screen hidden">
+        <h2>Selecciona tu arma</h2>
+        <div class="weapons">
+            <button class="weapon-btn" data-weapon="sword">Espada</button>
+            <button class="weapon-btn" data-weapon="knife">Navaja</button>
+            <button class="weapon-btn" data-weapon="hammer">Martillo</button>
+        </div>
+        <button id="fight-btn">Comenzar pelea</button>
+    </div>
+
+    <!-- Pantalla de combate -->
+    <div id="fight-screen" class="screen hidden">
+        <canvas id="fight-canvas" width="800" height="400"></canvas>
+        <div class="life-bars">
+            <div class="life-bar" id="player-life"></div>
+            <div class="life-bar" id="cpu-life"></div>
+        </div>
+    </div>
+
+    <!-- Pantalla de resultado -->
+    <div id="result-screen" class="screen hidden">
+        <h2 id="winner-text"></h2>
+        <button id="restart-btn">Reiniciar</button>
+    </div>
+
+<script src="game.js"></script>
+</body>
+</html>
